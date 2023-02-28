@@ -62,6 +62,9 @@ docker-push-all:
 	@echo "\nPushing codeserver-python image...\n"
 	make docker-push -C codeserver-python
 
+	@echo "\nPushing pyler-codeserver-python image...\n"
+	make docker-push -C pyler-codeserver-python
+
 	# @echo "\nPushing rstudio image...\n"
 	# make docker-push -C rstudio
 

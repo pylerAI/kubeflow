@@ -1,4 +1,4 @@
-FROM asia-northeast3-docker.pkg.dev/pyler-mlops/pyler-kubeflow-notebooks/codeserver-python:v1.1
+FROM asia-northeast3-docker.pkg.dev/pyler-mlops/pyler-kubeflow-notebooks/codeserver-python:v1.2.1
 
 USER root
 
@@ -23,9 +23,28 @@ RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] \
     && apt-get update -y && apt-get install google-cloud-cli -y
 
 # INSTALL ZSH
-RUN apt-get install -y zsh \
+RUN apt-get update \
+    && apt-get install -y zsh \
     && chsh -s `which zsh` \
     && curl -L https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh | sh
+
+RUN git clone https://github.com/zsh-users/zsh-autosuggestions \
+    ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions \
+    && git clone https://github.com/zsh-users/zsh-syntax-highlighting.git \
+    ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
+
+COPY zshrc.zsh-template ${HOME}/.zshrc
+RUN conda init zsh
+
+# s6 - copy scripts
+COPY --chown=jovyan:users s6/ /etc
+
+# s6 - 01-copy-tmp-home
+USER root
+RUN mkdir -p /tmp_home \
+    && cp -r ${HOME} /tmp_home \
+    && chown -R ${NB_USER}:users /tmp_home
+USER ${NB_UID}
 
 ENV SHELL /bin/zsh
 SHELL [ "/bin/zsh", "-c"]
