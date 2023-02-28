@@ -1,5 +1,5 @@
-TAG ?= $(shell git describe --tags --always --dirty)
-REGISTRY ?= kubeflownotebookswg
+TAG ?= v1.2.1
+REGISTRY ?= asia-northeast3-docker.pkg.dev/pyler-mlops/pyler-kubeflow-notebooks
 
 docker-build:
 	docker build -t ${REGISTRY}/base:${TAG} -f Dockerfile .

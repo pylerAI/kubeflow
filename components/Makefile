@@ -1,9 +1,9 @@
-REGISTRY ?= kubeflownotebookswg
-TAG ?= $(shell git describe --tags --always --dirty)
+REGISTRY ?= asia-northeast3-docker.pkg.dev/pyler-mlops/pyler-kubeflow-notebooks
+TAG ?= v1.2.1
 
 build-all:
 	@echo "\nBuilding KFAM image...\n"
-	make docker-build -C access-management 
+	make docker-build -C access-management
 
 	@echo "\nBuilding Admission-webhook image...\n"
 	make docker-build -C admission-webhook
@@ -34,7 +34,7 @@ build-all:
 
 	@echo "\nAll images of prv-kubeflow-kubeflow repo have been built successfully!\n"
 
-push-all:	
+push-all:
 	for img in kfam admission-webhook centraldashboard jupyter-web-app tensorboards-web-app volumes-web-app notebook-controller profile-controller \
 	tensorboard-controller ; do \
 		docker tag $$img:$(TAG) ${REGISTRY}/$$img:${TAG} ; \

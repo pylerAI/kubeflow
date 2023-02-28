@@ -2,7 +2,7 @@ REGISTRY_PROJECT ?= kubeflow-dev
 PROJECT ?= kubeflow-dev
 GO_SWAGGER_URL ?= https://github.com/go-swagger/go-swagger/releases/download/v0.21.0/swagger_linux_amd64
 
-GIT_VERSION := $(shell git describe --tags --always --dirty)
+GIT_VERSION := v1.1
 
 IMG ?= kfam
 TAG ?= $(GIT_VERSION)
@@ -18,7 +18,7 @@ bin/swagger:
 docker-build:
 	docker build -t $(IMG):$(TAG) .
 
-docker-push: 
+docker-push:
 	docker push $(IMG):$(TAG)
 
 .PHONY: docker-build-multi-arch
@@ -26,7 +26,7 @@ docker-build-multi-arch: ##  Build multi-arch docker images with docker buildx
 	docker buildx build --platform ${ARCH} --tag ${IMG}:${TAG} .
 
 .PHONY: docker-build-push-multi-arch
-docker-build-push-multi-arch: ## Build multi-arch docker images with docker buildx and push to docker registry 
+docker-build-push-multi-arch: ## Build multi-arch docker images with docker buildx and push to docker registry
 	docker buildx build --platform ${ARCH} --tag ${IMG}:${TAG} --push .
 
-image: docker-build docker-push 
+image: docker-build docker-push

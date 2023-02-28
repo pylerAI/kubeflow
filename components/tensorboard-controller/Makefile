@@ -1,6 +1,6 @@
 # Image URL to use all building/pushing image targets
 IMG ?= tensorboard-controller
-TAG ?= $(shell git describe --tags --always --dirty)
+TAG ?= v1.2.1
 ARCH ?= linux/amd64
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= "crd:trivialVersions=true"
@@ -73,7 +73,7 @@ run: manifests generate fmt vet ## Run a controller from your host.
 # Build the docker image
 .PHONY: docker-build
 docker-build:
-	cd ../ && docker build -t ${IMG}:${TAG} -f tensorboard-controller/Dockerfile . 
+	cd ../ && docker build -t ${IMG}:${TAG} -f tensorboard-controller/Dockerfile .
 
 # Push the docker image
 .PHONY: docker-push
@@ -86,7 +86,7 @@ docker-build-multi-arch: ##  Build multi-arch docker images with docker buildx
 
 
 .PHONY: docker-build-push-multi-arch
-docker-build-push-multi-arch: ## Build multi-arch docker images with docker buildx and push to docker registry 
+docker-build-push-multi-arch: ## Build multi-arch docker images with docker buildx and push to docker registry
 	cd ../ && docker buildx build --platform ${ARCH} --tag ${IMG}:${TAG} --push -f tensorboard-controller/Dockerfile .
 
 ##@ Deployment

@@ -1,24 +1,39 @@
 # Use the respective Makefile to pass the appropriate BASE_IMG and build the image correctly
-ARG BASE_IMG=<codeserver>
+ARG BASE_IMG=<base>
 FROM $BASE_IMG
 
 USER root
 
 # args - software versions
-ARG CODESERVER_PYTHON_VERSION=2021.5.842923320
 ARG MINIFORGE_ARCH="x86_64"
 # renovate: datasource=github-tags depName=conda-forge/miniforge versioning=loose
 ARG MINIFORGE_VERSION=4.10.1-4
 ARG PIP_VERSION=21.1.2
 ARG PYTHON_VERSION=3.8.10
 
+# install -- node.js
+RUN export DEBIAN_FRONTEND=noninteractive \
+   && curl -sL "https://deb.nodesource.com/gpgkey/nodesource.gpg.key" | apt-key add - \
+   && echo "deb https://deb.nodesource.com/node_14.x focal main" > /etc/apt/sources.list.d/nodesource.list \
+   && apt-get -yq update \
+   && apt-get -yq install --no-install-recommends \
+   nodejs \
+   && apt-get clean \
+   && rm -rf /var/lib/apt/lists/*
+
 # setup environment for conda
-ENV CONDA_DIR ${HOME}/.miniconda
+ENV CONDA_DIR ${HOME}
 ENV PATH "${CONDA_DIR}/bin:${PATH}"
 RUN mkdir -p ${CONDA_DIR} \
-   && chown -R ${NB_USER}:users ${CONDA_DIR}
+   && echo ". /opt/conda/etc/profile.d/conda.sh" >> ${HOME}/.bashrc \
+   && echo ". /opt/conda/etc/profile.d/conda.sh" >> /etc/profile \
+   && echo "conda activate base" >> ${HOME}/.bashrc \
+   && echo "conda activate base" >> /etc/profile \
+   && chown -R ${NB_USER}:users ${CONDA_DIR} \
+   && chown -R ${NB_USER}:users ${HOME}
 
-USER $NB_UID
+# switch to NB_UID for installs
+USER ${NB_UID}
 
 # install - conda, pip, python
 RUN curl -sL "https://github.com/conda-forge/miniforge/releases/download/${MINIFORGE_VERSION}/Miniforge3-${MINIFORGE_VERSION}-Linux-${MINIFORGE_ARCH}.sh" -o /tmp/Miniforge3.sh \
@@ -44,13 +59,10 @@ RUN curl -sL "https://github.com/conda-forge/miniforge/releases/download/${MINIF
 COPY --chown=jovyan:users requirements.txt /tmp
 RUN python3 -m pip install -r /tmp/requirements.txt --quiet --no-cache-dir \
    && rm -f /tmp/requirements.txt \
+   && jupyter lab --generate-config \
+   && rm -rf ${HOME}/.cache/yarn \
    && chown -R ${NB_USER}:users ${CONDA_DIR} \
    && chown -R ${NB_USER}:users ${HOME}
-
-# install - codeserver extensions
-RUN curl -# -L -o /tmp/ms-python-release.vsix "https://github.com/microsoft/vscode-python/releases/download/${CODESERVER_PYTHON_VERSION}/ms-python-release.vsix" \
-   && code-server --install-extension /tmp/ms-python-release.vsix \
-   && code-server --list-extensions --show-versions
 
 # s6 - copy scripts
 COPY --chown=jovyan:users s6/ /etc
@@ -61,3 +73,7 @@ RUN mkdir -p /tmp_home \
    && cp -r ${HOME} /tmp_home \
    && chown -R ${NB_USER}:users /tmp_home
 USER ${NB_UID}
+
+EXPOSE 8888
+
+ENTRYPOINT ["/init"]

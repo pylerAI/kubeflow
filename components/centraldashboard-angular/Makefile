@@ -1,5 +1,5 @@
 IMG ?= centraldashboard-angular
-TAG ?= $(shell git describe --tags --always --dirty)
+TAG ?= v1.2.1
 COMMIT = $(shell git rev-parse HEAD)
 
 # To build without the cache set the environment variable

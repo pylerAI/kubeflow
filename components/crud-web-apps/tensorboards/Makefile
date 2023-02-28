@@ -1,4 +1,4 @@
-TAG ?= $(shell git describe --tags --always --dirty)
+TAG ?= v1.2.1
 IMG ?= tensorboards-web-app
 DOCKERFILE ?= tensorboards/Dockerfile
 ARCH ?= linux/amd64
@@ -15,7 +15,7 @@ docker-build-multi-arch: ##  Build multi-arch docker images with docker buildx
 
 
 .PHONY: docker-build-push-multi-arch
-docker-build-push-multi-arch: ## Build multi-arch docker images with docker buildx and push to docker registry 
+docker-build-push-multi-arch: ## Build multi-arch docker images with docker buildx and push to docker registry
 	cd ../ && docker buildx build --platform ${ARCH} --tag ${IMG}:${TAG} --push -f ${DOCKERFILE} .
 
 image: docker-build docker-push

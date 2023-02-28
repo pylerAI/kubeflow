@@ -1,6 +1,6 @@
 # Image URL to use all building/pushing image targets
 IMG ?= profile-controller
-TAG ?= $(shell git describe --tags --always --dirty)
+TAG ?= v1.2.1
 ARCH ?= linux/amd64
 
 # ENVTEST_K8S_VERSION refers to the version of kubebuilder assets to be downloaded by envtest binary.
@@ -37,7 +37,7 @@ manifests: controller-gen ## Generate WebhookConfiguration, ClusterRole and Cust
 .PHONY: generate
 generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
-	
+
 
 .PHONY: fmt
 fmt: ## Run go fmt against code.
@@ -59,7 +59,7 @@ build: generate fmt vet ## Build manager binary.
 
 .PHONY: run
 run: manifests generate fmt vet ## Run a controller from your host.
-	go run ./main.go -namespace-labels-path ./config/base/namespace-labels.yaml 
+	go run ./main.go -namespace-labels-path ./config/base/namespace-labels.yaml
 
 .PHONY: docker-build
 docker-build: ## Build docker image with the manager.
@@ -75,7 +75,7 @@ docker-build-multi-arch: ##  Build multi-arch docker images with docker buildx
 	docker buildx build --platform ${ARCH} --tag ${IMG}:${TAG} .
 
 .PHONY: docker-build-push-multi-arch
-docker-build-push-multi-arch: ## Build multi-arch docker images with docker buildx and push to docker registry 
+docker-build-push-multi-arch: ## Build multi-arch docker images with docker buildx and push to docker registry
 	docker buildx build --platform ${ARCH} --tag ${IMG}:${TAG} --push .
 
 .PHONY: image
